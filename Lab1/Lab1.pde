@@ -1,20 +1,46 @@
+import processing.serial.*; //Reuquired for accessing serial port
 import org.gicentre.utils.stat.*;   // Requires giCentre Utils
+
+Serial port;
 
 int[] rateTime = {45, 0}; //Minutes, seconds
 
 //Chart variables
 XYChart chart;
-float[] xPlot = new float[rateTime[0]];  // 50 points
-float[] yPlot = new float[rateTime[0]];
-  //Rest, cardio, max
+
+// Ring buffers
+final int N = 800;
+float[] bufA = new float[N];
+int idx = 0;
+
+float[] xPlot = new float[N];
+float[] yPlot = new float[N];
+
+ //Rest, cardio, max
 color[] chartColors = {color(65, 245, 130), color(245, 230, 65), color(245, 160, 65)};
 
 void setup() {
   size(400,400);
   textSize(15);
   textAlign(CENTER, CENTER);
+  setupPort();
   
   createChart();
+}
+
+void setupPort() {
+  println("Ports: ", Serial.list());
+  int serial_len = Serial.list().length;
+  if (serial_len > 0) {
+    for (int i = 0; i < serial_len; i++) {
+      String portName = Serial.list()[i];
+      if (portName.equals("/dev/cu.usbmodem123456781")) {
+        port = new Serial(this, portName, 115200);
+        port.clear();
+        break;
+      }
+    }
+  }
 }
 
 void createChart() {
@@ -102,4 +128,21 @@ void draw() {
   createHeader();
   displayExericiseZones();
   displayGraph();
+}
+
+//Called from Serial object!
+void serialEvent(Serial p) {
+  String line = p.readStringUntil('\n');
+  if (line == null) return;
+  line = trim(line);
+  if (line.length() == 0) return;
+
+  // Expect "A:123,B:456"
+  String[] parts = splitTokens(line, ",:");
+  if (parts.length >= 4) {
+    float va = float(parts[1]);
+
+    bufA[idx] = va;
+    idx = (idx + 1) % N;
+  }
 }
