@@ -53,13 +53,13 @@ void biohub() {
     // Print the data to the Serial Monitor
     Serial.print("Heartrate: ");
     Serial.println(body.heartRate);
-    Serial.print("Oxygen: ");
-    Serial.println(body.oxygen);
-    Serial.print("Confidence: ");
-    Serial.println(body.confidence);
-    Serial.print("Status: ");
-    Serial.println(body.status); // Status 0 indicates valid data
-    Serial.println("----------");
+    // Serial.print("Oxygen: ");
+    // Serial.println(body.oxygen);
+    // Serial.print("Confidence: ");
+    // Serial.println(body.confidence);
+    // Serial.print("Status: ");
+    // Serial.println(body.status); // Status 0 indicates valid data
+    // Serial.println("----------");
   }
 
   // Slowing down the loop

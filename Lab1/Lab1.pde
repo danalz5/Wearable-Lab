@@ -1,4 +1,4 @@
-import processing.serial.*; //Reuquired for accessing serial port
+import processing.serial.*; //Required for accessing serial port
 import org.gicentre.utils.stat.*;   // Requires giCentre Utils
 
 Serial port;
@@ -45,10 +45,10 @@ void setupPort() {
 
 void createChart() {
   // Generate some sample points from 0 to 160
-  for (int i = 0; i < xPlot.length; i++) {
-    xPlot[i] = i;  // x values from 0 to 49
-    yPlot[i] = random(0, 160);  // random y values from 0 to 160
-  }
+  //for (int i = 0; i < xPlot.length; i++) {
+  //  xPlot[i] = i;  // x values from 0 to 49
+  //  yPlot[i] = random(0, 160);  // random y values from 0 to 160
+  //}
   
   //Create a chart
   chart = new XYChart(this);
@@ -136,13 +136,9 @@ void serialEvent(Serial p) {
   if (line == null) return;
   line = trim(line);
   if (line.length() == 0) return;
+  float v = float(line);
 
-  // Expect "A:123,B:456"
-  String[] parts = splitTokens(line, ",:");
-  if (parts.length >= 4) {
-    float va = float(parts[1]);
-
-    bufA[idx] = va;
-    idx = (idx + 1) % N;
-  }
+  bufA[idx] = v;
+  chart.setLineColour((v < 100)? chartColors[0]: (v < 130)? chartColors[1]: chartColors[2]);
+  idx = (idx + 1) % N;
 }
