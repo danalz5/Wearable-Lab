@@ -1,14 +1,12 @@
-import processing.serial.*; //Required for accessing serial port
-import org.gicentre.utils.stat.*;   // Requires giCentre Utils
-
-Serial port;
-int numSeconds = 0;
-
 //Chart variables
-ArrayList<Float> heartRates = new ArrayList<Float>();
-ArrayList<Float> timeStamps = new ArrayList<Float>();
+color[] chartColors = {color(0, 190, 255), color(65, 245, 130), color(98, 245, 65), color(245, 230, 65), color(245, 160, 65)}; //light, moderate, hard, max
 
-color[] chartColors = {color(65, 245, 130), color(245, 230, 65), color(245, 160, 65)}; //Rest, cardio, max
+float maximum = 0;
+float hard = 0;
+float moderate = 0;
+float light = 0;
+float veryLight = 0;
+float minimum = 0;
 
 int chartX = 50;
 int chartY = 250;
@@ -23,26 +21,13 @@ int idx = 0;
 float[] xPlot = new float[N];
 float[] yPlot = new float[N];
 
-void setup() {
-  size(400,400);
-  textSize(15);
-  textAlign(CENTER, CENTER);
-  setupPort();
-}
-
-void setupPort() {
-  println("Ports: ", Serial.list());
-  int serial_len = Serial.list().length;
-  if (serial_len > 0) {
-    for (int i = 0; i < serial_len; i++) {
-      String portName = Serial.list()[i];
-      if (portName.equals("/dev/cu.usbmodem123456781")) {
-        port = new Serial(this, portName, 115200);
-        port.clear();
-        break;
-      }
-    }
-  }
+void setHeartRateValues() {
+  maximum = maxHeartRate;
+  hard = maxHeartRate * 0.9;
+  moderate = maxHeartRate * 0.8;
+  light = maxHeartRate * 0.7;
+  veryLight = maxHeartRate * 0.6;
+  minimum = maxHeartRate * 0.5;
 }
 
 void createHeader() {
@@ -77,6 +62,7 @@ void displayExericiseZones() {
   int yOffset = 45;
 
   // Loop through each heart rate zone
+  //println("This is the 1st loop");
   for (int i = 0; i < labels.length; i++) {
     fill(colors[i]);
     rect(30, 90 + yOffset * i, widths[i], 30);
@@ -99,57 +85,51 @@ void drawAxes() {
   line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);  // X-axis
   
   // Add labels, tick marks as needed
+  //int lineLength = 10;
+  
+  //line(chartX, chartY, chartX + lineLength, chartY);  // Y-axis
 }
 
 void drawHeartRateLine() {
   //print(millis());
   //println(heartRates.size());
   if (heartRates.size() < 2) return;
+  float init_time = timeStamps.get(0);
+  float end_time = timeStamps.get(timeStamps.size() - 1);
   
-  
+  //println("This is the 2nd loop");
   for (int i = 0; i < heartRates.size() - 2; i++) {
     float hr = heartRates.get(i);
     
     // Set color based on heart rate zone
-    if (hr <= 100) {
-      stroke(chartColors[0]);  // green - fat burn
-    } else if (hr <= 130) {
-      stroke(chartColors[1]);  // yellow - cardio
+    if (hr <= veryLight) {
+      stroke(chartColors[0]);  // gray - very light
+    } else if (hr <= light) {
+      stroke(chartColors[1]);  // blue - light
+    } else if (hr <= moderate) {
+      stroke(chartColors[2]);  // green - moderate
+    } else if (hr <= hard) {
+      stroke(chartColors[3]);  // yellow - cardio
     } else {
-      stroke(chartColors[2]);  // red - peak
+      stroke(chartColors[4]);  // red - peak
     }
     
     strokeWeight(2);
     
     // Map to screen coordinates
-    float x1 = map(timeStamps.get(i), 0.0, millis()/1000.0, chartX, chartX + chartWidth);
-    float y1 = map(hr, 0, 160, chartY + chartHeight, chartY);
-    float x2 = map(timeStamps.get(i+1), 0.0, millis()/1000.0, chartX, chartX + chartWidth);
-    float y2 = map(heartRates.get(i+1), 0.0, 160, chartY + chartHeight, chartY);
+    float x1 = map(timeStamps.get(i), init_time, end_time, chartX, chartX + chartWidth);
+    float y1 = map(hr, minimum, maximum, chartY + chartHeight, chartY);
+    float x2 = map(timeStamps.get(i+1), init_time, end_time, chartX, chartX + chartWidth);
+    float y2 = map(heartRates.get(i+1), minimum, maximum, chartY + chartHeight, chartY);
     
     line(x1, y1, x2, y2);
   }
+  //println("Finished 2nd loop");
 }
 
-void draw() {
-  background(255);
-  
+
+void drawHealthGraphPage(){
   createHeader();
   displayExericiseZones();
   displayGraph();
-}
-
-//Called from Serial object!
-void serialEvent(Serial p) {
-  String line = p.readStringUntil('\n');
-  
-  //If the 
-  if (line == null) return;
-  line = trim(line);
-  if (line.length() == 0) return;
-  
-  float v = float(line);
-  float currentTime = millis() / 1000.0;  // seconds
-  timeStamps.add(currentTime);
-  heartRates.add(v);
 }
