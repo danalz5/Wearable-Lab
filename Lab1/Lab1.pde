@@ -2,11 +2,18 @@ import processing.serial.*; //Required for accessing serial port
 import org.gicentre.utils.stat.*;   // Requires giCentre Utils
 
 Serial port;
-
-int[] rateTime = {45, 0}; //Minutes, seconds
+int numSeconds = 0;
 
 //Chart variables
-XYChart chart;
+ArrayList<Float> heartRates = new ArrayList<Float>();
+ArrayList<Float> timeStamps = new ArrayList<Float>();
+
+color[] chartColors = {color(65, 245, 130), color(245, 230, 65), color(245, 160, 65)}; //Rest, cardio, max
+
+int chartX = 50;
+int chartY = 250;
+int chartWidth = 250;
+int chartHeight = 100;
 
 // Ring buffers
 final int N = 800;
@@ -16,16 +23,11 @@ int idx = 0;
 float[] xPlot = new float[N];
 float[] yPlot = new float[N];
 
- //Rest, cardio, max
-color[] chartColors = {color(65, 245, 130), color(245, 230, 65), color(245, 160, 65)};
-
 void setup() {
   size(400,400);
   textSize(15);
   textAlign(CENTER, CENTER);
   setupPort();
-  
-  createChart();
 }
 
 void setupPort() {
@@ -41,26 +43,6 @@ void setupPort() {
       }
     }
   }
-}
-
-void createChart() {
-  // Generate some sample points from 0 to 160
-  //for (int i = 0; i < xPlot.length; i++) {
-  //  xPlot[i] = i;  // x values from 0 to 49
-  //  yPlot[i] = random(0, 160);  // random y values from 0 to 160
-  //}
-  
-  //Create a chart
-  chart = new XYChart(this);
-  chart.setData(xPlot, yPlot);
-  chart.showXAxis(true);
-  chart.showYAxis(true);
-  
-  // Styles
-  chart.setPointSize(0);                       // lines only
-  chart.setLineColour(chartColors[0]);     // red-ish for A
-  chart.setLineWidth(2);
-  chart.setMinX(0); chart.setMaxX(rateTime[0]);
 }
 
 void createHeader() {
@@ -104,27 +86,54 @@ void displayExericiseZones() {
 }
 
 void displayGraph(){
-  textAlign(LEFT, CENTER);
-  fill(0, 0, 0);
-  text("Heart Rate", 30, 225);
-  
-  //Display BEATS per minute
-  text("140 BPM", 30, 250);
-  
-  chart.draw(30, 275, width * 0.8, height / 4.0);
+  // Draw axes
+  drawAxes();
+  // Draw heart rate line with zone colors
+  drawHeartRateLine();
 }
 
-// Helper function
-float[] convertToArray(ArrayList<Float> list) {
-  float[] arr = new float[list.size()];
-  for (int i = 0; i < list.size(); i++) {
-    arr[i] = list.get(i);
+void drawAxes() {
+  stroke(0);
+  strokeWeight(1);
+  line(chartX, chartY, chartX, chartY + chartHeight);  // Y-axis
+  line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);  // X-axis
+  
+  // Add labels, tick marks as needed
+}
+
+void drawHeartRateLine() {
+  //print(millis());
+  //println(heartRates.size());
+  if (heartRates.size() < 2) return;
+  
+  
+  for (int i = 0; i < heartRates.size() - 2; i++) {
+    float hr = heartRates.get(i);
+    
+    // Set color based on heart rate zone
+    if (hr <= 100) {
+      stroke(chartColors[0]);  // green - fat burn
+    } else if (hr <= 130) {
+      stroke(chartColors[1]);  // yellow - cardio
+    } else {
+      stroke(chartColors[2]);  // red - peak
+    }
+    
+    strokeWeight(2);
+    
+    // Map to screen coordinates
+    float x1 = map(timeStamps.get(i), 0.0, millis()/1000.0, chartX, chartX + chartWidth);
+    float y1 = map(hr, 0, 160, chartY + chartHeight, chartY);
+    float x2 = map(timeStamps.get(i+1), 0.0, millis()/1000.0, chartX, chartX + chartWidth);
+    float y2 = map(heartRates.get(i+1), 0.0, 160, chartY + chartHeight, chartY);
+    
+    line(x1, y1, x2, y2);
   }
-  return arr;
 }
 
 void draw() {
   background(255);
+  
   createHeader();
   displayExericiseZones();
   displayGraph();
@@ -133,12 +142,14 @@ void draw() {
 //Called from Serial object!
 void serialEvent(Serial p) {
   String line = p.readStringUntil('\n');
+  
+  //If the 
   if (line == null) return;
   line = trim(line);
   if (line.length() == 0) return;
+  
   float v = float(line);
-
-  bufA[idx] = v;
-  chart.setLineColour((v < 100)? chartColors[0]: (v < 130)? chartColors[1]: chartColors[2]);
-  idx = (idx + 1) % N;
+  float currentTime = millis() / 1000.0;  // seconds
+  timeStamps.add(currentTime);
+  heartRates.add(v);
 }

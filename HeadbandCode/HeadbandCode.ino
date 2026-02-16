@@ -41,7 +41,7 @@ void buzzerCode() {
   delay(1000);
 
   // Stop the tone
-  noTone(buzzerPin);      
+  noTone(buzzerPin);
   delay(1000);
 }
 
@@ -51,7 +51,7 @@ void biohub() {
 
   if (body.heartRate != 0) {
     // Print the data to the Serial Monitor
-    Serial.print("Heartrate: ");
+    // Serial.print("Heartrate: ");
     Serial.println(body.heartRate);
     // Serial.print("Oxygen: ");
     // Serial.println(body.oxygen);
