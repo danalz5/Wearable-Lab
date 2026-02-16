@@ -1,4 +1,5 @@
 int baseHeartRate = 0;
+int maxHeartRate = 0;
 
 int bhrPage = 0;  // 0 = instruction, 1 = timer, 2 = success
 int timerStart = 0;
@@ -45,6 +46,7 @@ void showTimerPage() {
     textSize(24);
   }else {
     bhrPage = 2;
+    calculateBHR();
   }
 }
 
@@ -54,6 +56,8 @@ void displayLastPage(){
   text("Success!", width/2, height/2 - 30);
   
   fill(0);
+  textSize(15);
+  text("Your resting heart rate is " + baseHeartRate, width/2, height/2);
   textSize(18);
   text("Press any key to start the exercise", width/2, height/2 + 30);
   textSize(24);
@@ -71,4 +75,29 @@ void keyPressedBHR(){
     println("Starting exercise!");
     // You can set a flag here to start your heart rate monitoring
   }
+}
+
+void calculateBHR() {
+  float total = 0;
+  for (float heartRate: heartRates) {
+    total += heartRate;
+  }
+  baseHeartRate = (int)(total / heartRates.size());
+  maxHeartRate = 220 - baseHeartRate;
+  println(baseHeartRate);
+  println(heartRates);
+  heartRates.clear();
+  println(heartRates);
+}
+
+void serialEventBHR(Serial p) {
+  String line = p.readStringUntil('\n');
+  
+  //If the 
+  if (line == null || !isNumeric(line)) return;
+  line = trim(line);
+  if (line.length() == 0) return;
+  
+  float v = float(line);
+  heartRates.add(v);
 }

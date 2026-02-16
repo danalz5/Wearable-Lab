@@ -6,12 +6,20 @@ int numSeconds = 0;
 
 //Global Varaibles
 int page = 0;
+ArrayList<Float> heartRates = new ArrayList<Float>();
+ArrayList<Float> timeStamps = new ArrayList<Float>();
 
 void setup() {
   size(400,400);
   textSize(15);
   textAlign(CENTER, CENTER);
   setupPort();
+  setupDoneButtonProperties();
+  
+  age = 25;
+  maxHeartRate = 220 - age;
+  setHeartRateValues();
+  page = 2;
 }
 
 void setupPort() {
@@ -29,27 +37,6 @@ void setupPort() {
   }
 }
 
-void createHeader() {
-  //Creates rectangle
-  fill(12, 55, 84);
-  stroke(0);
-  rect(0, 0, width, 50);
-  
-  fill(255, 240);
-  textAlign(CENTER, CENTER);
-  // Format and display date
-  String date = nf(month(), 2) + "/" + nf(day(), 2) + "/" + nf(year(), 2);
-  text(date, width/8, 30);
-  
-  //Display time in app
-  String timeInApp = "43:33 min";
-  text(timeInApp, width/2, 30);
-  
-  // Format and display time
-  String time = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
-  text(time, width * 7 / 8, 30);
-}
-
 
 void draw() {
   background(255);
@@ -61,9 +48,12 @@ void draw() {
     case 1:
       displayBHRPage();
       break;
-   case 2:
-    drawHealthGRaphPage();
-    break;
+    case 2:
+      drawExercisePage();
+      break;
+    case 3:
+      drawHealthGraphPage();
+      break;
   }
 }
 
@@ -71,6 +61,7 @@ boolean isNumeric(String strNum) {
     if (strNum == null) {
         return false;
     }
+    
     try {
         double d = Double.parseDouble(strNum);
     } catch (NumberFormatException nfe) {
@@ -81,17 +72,14 @@ boolean isNumeric(String strNum) {
 
 //Called from Serial object!
 void serialEvent(Serial p) {
-  String line = p.readStringUntil('\n');
-  
-  //If the 
-  if (line == null || !isNumeric(line)) return;
-  line = trim(line);
-  if (line.length() == 0) return;
-  
-  float v = float(line);
-  float currentTime = millis() / 1000.0;  // seconds
-  timeStamps.add(currentTime);
-  heartRates.add(v);
+  switch (page) {
+    case 1:
+      serialEventBHR(p);
+      break;
+    case 2:
+      serialEventExercise(p);
+      break;
+  }
 }
 
 void keyPressed() {
