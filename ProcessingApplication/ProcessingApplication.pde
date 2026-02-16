@@ -59,8 +59,11 @@ void draw() {
       drawInputPage();
       break;
     case 1:
-      drawHealthGRaphPage();
+      displayBHRPage();
       break;
+   case 2:
+    drawHealthGRaphPage();
+    break;
   }
 }
 
@@ -89,4 +92,15 @@ void serialEvent(Serial p) {
   float currentTime = millis() / 1000.0;  // seconds
   timeStamps.add(currentTime);
   heartRates.add(v);
+}
+
+void keyPressed() {
+  switch (page) {
+    case 0:
+      keyPressedUserInput();
+      break;
+    case 1:
+      keyPressedBHR();
+      break;
+  }
 }

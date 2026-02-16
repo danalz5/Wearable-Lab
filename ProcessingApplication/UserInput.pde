@@ -19,22 +19,20 @@ void drawInputPage(){
   textSize(20);
 }
 
-void keyPressed() {
-  if (page == 0) {
-    if (key == ENTER || key == RETURN) {
-      // Convert input to age
-      if (userInput.length() > 0) {
-        age = int(userInput);
-        page = 1;
-      }
-    } else if (key == BACKSPACE) {
-      // Delete last character
-      if (userInput.length() > 0) {
-        userInput = userInput.substring(0, userInput.length() - 1);
-      }
-    } else if (key >= '0' && key <= '9') {
-      // Only accept numbers
-      userInput += key;
+void keyPressedUserInput() {
+  if (key == ENTER || key == RETURN) {
+    // Convert input to age
+    if (userInput.length() > 0) {
+      age = int(userInput);
+      page = 1;
     }
+  } else if (key == BACKSPACE) {
+    // Delete last character
+    if (userInput.length() > 0) {
+      userInput = userInput.substring(0, userInput.length() - 1);
+    }
+  } else if (key >= '0' && key <= '9') {
+    // Only accept numbers
+    userInput += key;
   }
 }
