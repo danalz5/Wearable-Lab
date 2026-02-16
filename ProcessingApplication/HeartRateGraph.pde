@@ -1,5 +1,6 @@
 //Chart variables
-color[] chartColors = {color(0, 190, 255), color(65, 245, 130), color(98, 245, 65), color(245, 230, 65), color(245, 160, 65)}; //light, moderate, hard, max
+color[] chartColors = {color(150, 150, 150), color(0, 190, 255), color(65, 245, 130), color(98, 245, 65), color(245, 160, 65)}; //light, moderate, hard, max
+//Grey, Blue, green, yellow, orange
 
 float maximum = 0;
 float hard = 0;
@@ -85,9 +86,13 @@ void drawAxes() {
   line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);  // X-axis
   
   // Add labels, tick marks as needed
-  //int lineLength = 10;
+  int lineLength = 10;
+  float increment = 1.0 / chartColors.length;
   
-  //line(chartX, chartY, chartX + lineLength, chartY);  // Y-axis
+  for (int i = 0 ; i < 5; i ++) {
+    float newChartHeight = chartY + (chartHeight * increment * (i + 1));
+    line(chartX, newChartHeight, chartX + lineLength, newChartHeight);  // Y-axis
+  }
 }
 
 void drawHeartRateLine() {
@@ -99,7 +104,8 @@ void drawHeartRateLine() {
   
   //println("This is the 2nd loop");
   for (int i = 0; i < heartRates.size() - 2; i++) {
-    float hr = heartRates.get(i);
+    float hr = Math.min(maximum, Math.max(minimum, heartRates.get(i)));
+    float nextHR = Math.min(maximum, Math.max(minimum, heartRates.get(i + 1)));
     
     // Set color based on heart rate zone
     if (hr <= veryLight) {
@@ -118,9 +124,10 @@ void drawHeartRateLine() {
     
     // Map to screen coordinates
     float x1 = map(timeStamps.get(i), init_time, end_time, chartX, chartX + chartWidth);
-    float y1 = map(hr, minimum, maximum, chartY + chartHeight, chartY);
     float x2 = map(timeStamps.get(i+1), init_time, end_time, chartX, chartX + chartWidth);
-    float y2 = map(heartRates.get(i+1), minimum, maximum, chartY + chartHeight, chartY);
+    
+    float y1 = map(hr, minimum, maximum, chartY + chartHeight, chartY);
+    float y2 = map(nextHR, minimum, maximum, chartY + chartHeight, chartY);
     
     line(x1, y1, x2, y2);
   }

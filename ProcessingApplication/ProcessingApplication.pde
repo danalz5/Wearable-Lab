@@ -16,7 +16,7 @@ void setup() {
   setupPort();
   setupDoneButtonProperties();
   
-  age = 25;
+  age = 21;
   maxHeartRate = 220 - age;
   setHeartRateValues();
   page = 2;
@@ -50,6 +50,7 @@ void draw() {
       break;
     case 2:
       drawExercisePage();
+      //sampleData();
       break;
     case 3:
       drawHealthGraphPage();

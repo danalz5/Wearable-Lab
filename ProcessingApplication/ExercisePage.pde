@@ -3,6 +3,8 @@ int buttonX, buttonY, buttonW, buttonH;
 float startExercise = 0;
 float endExercise = 0;
 
+float sampleValue = 110;
+
 void setupDoneButtonProperties(){
   // Define button position and size
   buttonW = 150;
@@ -60,6 +62,18 @@ void mousePressed() {
       page = 3;  // Move to next page
     }
   }
+}
+
+
+void sampleData() {
+  float currentTime = (millis() - startExercise) / 1000.0;  // seconds
+  timeStamps.add(currentTime);
+  heartRates.add(sampleValue);
+  println(timeStamps);
+  println(heartRates);
+  println(timeStamps.size() == heartRates.size());
+  sampleValue += random(-2, 2);
+  sampleValue = Math.min(maxHeartRate, Math.max(0, sampleValue));
 }
 
 void serialEventExercise(Serial p) {
