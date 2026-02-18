@@ -52,14 +52,14 @@ void drawButton() {
   text("Done", width/2, buttonY + buttonH/2);
 }
 
-void mousePressed() {
-  if (page == 2) {
+void mousePressedExercise() {
+  if (page == Page.EXERCISE_PAGE) {
     // Check if Done button was clicked
     if (mouseX > buttonX && mouseX < buttonX + buttonW &&
         mouseY > buttonY && mouseY < buttonY + buttonH) {
       println("Done button clicked!");
       endExercise = millis();
-      page = 3;  // Move to next page
+      page = Page.HEART_RATE_GRAPH;  // Move to next page
     }
   }
 }

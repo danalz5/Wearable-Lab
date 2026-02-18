@@ -24,7 +24,8 @@ void keyPressedUserInput() {
     // Convert input to age
     if (userInput.length() > 0) {
       age = int(userInput);
-      page = 1;
+      maxHeartRate = 220 - age;
+      page = Page.BASE_HEART_RATE;
     }
   } else if (key == BACKSPACE) {
     // Delete last character
