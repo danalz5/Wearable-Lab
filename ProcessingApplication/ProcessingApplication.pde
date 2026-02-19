@@ -20,7 +20,7 @@ int numSeconds = 0;
 //Global Varaibles
 Page page = Page.AGE_INPUT;
 ArrayList<Float> heartRates = new ArrayList<Float>();
-ArrayList<Float> timeStamps = new ArrayList<Float>();
+ArrayList<Float> timeStamps = new ArrayList<Float>(); //Seconds
 int maxHeartRate = 0;
 
 void setup() {
@@ -36,6 +36,7 @@ void setup() {
   age = 21;
   maxHeartRate = 220 - age;
   baseHeartRate = (int)(maxHeartRate * 0.5);
+  setHeartRateValues();
   //Setting the page
   page = Page.SELECT_MODE;
 }
@@ -71,7 +72,7 @@ void draw() {
       break;
     case EXERCISE_PAGE:
       drawExercisePage();
-      //sampleData();
+      sampleData();
       break;
     case HEART_RATE_GRAPH:
       drawHealthGraphPage();
@@ -105,7 +106,7 @@ void serialEvent(Serial p) {
       serialEventBHR(p);
       break;
     case EXERCISE_PAGE:
-      serialEventExercise(p);
+      //serialEventExercise(p);
       break;
     case CALM_MUSIC:
       serialEventCalm(p);

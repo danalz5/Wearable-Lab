@@ -31,6 +31,17 @@ void setHeartRateValues() {
   minimum = maxHeartRate * 0.5;
 }
 
+float percentRage(ArrayList<Float> values, float min, float max) {
+  int count = 0;
+  for (float value : values) {
+    if (value >= min && value <= max) {
+      count++;
+    }
+  }
+  println(count);
+  return (float)count / values.size();
+}
+
 void createHeader() {
   //Creates rectangle
   fill(12, 55, 84);
@@ -57,8 +68,21 @@ void displayExericiseZones() {
   fill(0, 0, 0);
   text("Exercise Zones", 30, 75);
   
+  float cardioMax = maximum * 0.85;
+  
+  float fatBurnPercentage = percentRage(heartRates, minimum, maximum);
+  println(fatBurnPercentage);
+  float cardioPercentage = percentRage(heartRates, light, maximum);
+  println(cardioPercentage);
+  float peakPercentage = percentRage(heartRates, cardioMax, maximum);
+  println(peakPercentage);
+  
+  float totalSeconds = timeStamps.get(timeStamps.size() - 1) - timeStamps.get(0);
+  
+  
+  int MAX_WIDTH = 135;
   String[] labels = {"Peak", "Cardio", "Fat burn"};
-  int[] widths = {60, 120, 240};
+  int[] widths = { (int)(fatBurnPercentage * MAX_WIDTH), (int)(cardioPercentage * MAX_WIDTH), (int)(peakPercentage * MAX_WIDTH)};
   color[] colors = {color(255, 150, 150), color(230, 160, 75), color(230, 215, 75)};
   int yOffset = 45;
 
@@ -68,7 +92,7 @@ void displayExericiseZones() {
     fill(colors[i]);
     rect(30, 90 + yOffset * i, widths[i], 30);
     fill(0, 0, 0);
-    text(labels[i], 45 + widths[i], 105 + yOffset * i);
+    text( (int)(fatBurnPercentage * totalSeconds / 60) + " min " + labels[i], 45 + widths[i], 105 + yOffset * i);
   }
 }
 
@@ -96,7 +120,7 @@ void drawAxes() {
 }
 
 void drawHeartRateLine() {
-  //print(millis());
+  //println(millis());
   //println(heartRates.size());
   if (heartRates.size() < 2) return;
   float init_time = timeStamps.get(0);
@@ -128,9 +152,12 @@ void drawHeartRateLine() {
     
     float y1 = map(hr, minimum, maximum, chartY + chartHeight, chartY);
     float y2 = map(nextHR, minimum, maximum, chartY + chartHeight, chartY);
+    //println(x1 + " "  + x2 + " "  + y1 + " "  + y2);
     
     line(x1, y1, x2, y2);
   }
+  
+  text( (int)((end_time - init_time) / 60) + " min",chartX + chartWidth, chartY + chartHeight);
   //println("Finished 2nd loop");
 }
 

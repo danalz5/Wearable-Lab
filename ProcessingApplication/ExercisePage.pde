@@ -59,6 +59,7 @@ void mousePressedExercise() {
         mouseY > buttonY && mouseY < buttonY + buttonH) {
       println("Done button clicked!");
       endExercise = millis();
+      setHeartRateValues();
       page = Page.HEART_RATE_GRAPH;  // Move to next page
     }
   }
@@ -69,11 +70,12 @@ void sampleData() {
   float currentTime = (millis() - startExercise) / 1000.0;  // seconds
   timeStamps.add(currentTime);
   heartRates.add(sampleValue);
-  println(timeStamps);
-  println(heartRates);
-  println(timeStamps.size() == heartRates.size());
+  //println(timeStamps);
+  //println(heartRates);
+  //println(timeStamps.size() == heartRates.size());
   sampleValue += random(-2, 2);
-  sampleValue = Math.min(maxHeartRate, Math.max(0, sampleValue));
+  //sampleValue = Math.min(maxHeartRate, Math.max(0, sampleValue));
+  sampleValue = Math.min(maxHeartRate, Math.max(light, sampleValue));
 }
 
 void serialEventExercise(Serial p) {
