@@ -1,13 +1,27 @@
 import processing.serial.*; //Required for accessing serial port
 import org.gicentre.utils.stat.*;   // Requires giCentre Utils
 
+enum Page {
+  AGE_INPUT,
+  BASE_HEART_RATE,
+  SELECT_MODE,
+  //Fitnessmode
+  EXERCISE_PAGE,
+  HEART_RATE_GRAPH,
+  //Calm Mode
+  CALM_MUSIC,
+  //Stress Mode
+  STRESS_PAGE
+}
+
 Serial port;
 int numSeconds = 0;
 
 //Global Varaibles
-int page = 0;
+Page page = Page.AGE_INPUT;
 ArrayList<Float> heartRates = new ArrayList<Float>();
 ArrayList<Float> timeStamps = new ArrayList<Float>();
+int maxHeartRate = 0;
 
 void setup() {
   size(400,400);
@@ -15,11 +29,15 @@ void setup() {
   textAlign(CENTER, CENTER);
   setupPort();
   setupDoneButtonProperties();
+  setupCalmPage();
   
+  
+  //Setting varaibles automatically
   age = 21;
   maxHeartRate = 220 - age;
-  setHeartRateValues();
-  page = 2;
+  baseHeartRate = (int)(maxHeartRate * 0.5);
+  //Setting the page
+  page = Page.SELECT_MODE;
 }
 
 void setupPort() {
@@ -42,18 +60,27 @@ void draw() {
   background(255);
   
   switch (page) {
-    case 0:
+    case AGE_INPUT:
       drawInputPage();
       break;
-    case 1:
+    case BASE_HEART_RATE:
       displayBHRPage();
       break;
-    case 2:
+    case SELECT_MODE:
+      drawSelectPage();
+      break;
+    case EXERCISE_PAGE:
       drawExercisePage();
       //sampleData();
       break;
-    case 3:
+    case HEART_RATE_GRAPH:
       drawHealthGraphPage();
+      break;
+    case CALM_MUSIC:
+      drawCalmPage();
+      break;
+    case STRESS_PAGE:
+      drawStressModePage();
       break;
   }
 }
@@ -74,22 +101,39 @@ boolean isNumeric(String strNum) {
 //Called from Serial object!
 void serialEvent(Serial p) {
   switch (page) {
-    case 1:
+    case BASE_HEART_RATE:
       serialEventBHR(p);
       break;
-    case 2:
+    case EXERCISE_PAGE:
       serialEventExercise(p);
+      break;
+    case CALM_MUSIC:
+      serialEventCalm(p);
+      break;
+    case STRESS_PAGE:
+      serialEventStress(p);
       break;
   }
 }
 
 void keyPressed() {
   switch (page) {
-    case 0:
+    case AGE_INPUT:
       keyPressedUserInput();
       break;
-    case 1:
+    case BASE_HEART_RATE:
       keyPressedBHR();
+      break;
+  }
+}
+
+void mousePressed() {
+  switch (page) {
+    case SELECT_MODE:
+      mousePressedSelect();
+      break;
+    case EXERCISE_PAGE:
+      mousePressedExercise();
       break;
   }
 }

@@ -3,7 +3,16 @@ int buzzerPin = 11;
 #include <Wire.h> // I2C Library
 #include "SparkFun_Bio_Sensor_Hub_Library.h" // SparkFun Bio Sensor Hub Library
 
+//Biohub varaibles
 SparkFun_Bio_Sensor_Hub bioHub; // Create an object of the library
+unsigned long lastBioHubCheck = 0;
+const BIOHUB_INTERVAL = 250;
+
+//Buzzer variables
+bool buzzerOn = false;
+unsigned long lastBuzzerCheck = 0;
+const BUZZER_INTERVAL1 = 1000;
+const BUZZER_INTERVAL2 = 2000;
 
 void setup() {
   pinMode(buzzerPin, OUTPUT); // Set the buzzer pin as an output
@@ -36,6 +45,11 @@ void intiializeBiohub(){
 }
 
 void buzzerCode() {
+  if (!buzzerOn) return;
+
+  //TODO: Replace BUZZER CODE HERE!
+
+  
   // Play a 1000 Hz tone for 1 second
   tone(buzzerPin, 1000);
   delay(1000);
@@ -43,30 +57,46 @@ void buzzerCode() {
   // Stop the tone
   noTone(buzzerPin);
   delay(1000);
+  buzzerOn = false;
 }
 
 void biohub() {
-  // Information from the readBpm function will be saved to the "body" variable
-  bioData body = bioHub.readBpm();
+  if (millis() - lastBioHubCheck >= BIOHUB_INTERVAL){
+    lastBioHubCheck = millis();
+    // Information from the readBpm function will be saved to the "body" variable
+    bioData body = bioHub.readBpm();
 
-  if (body.heartRate != 0) {
-    // Print the data to the Serial Monitor
-    // Serial.print("Heartrate: ");
-    Serial.println(body.heartRate);
-    // Serial.print("Oxygen: ");
-    // Serial.println(body.oxygen);
-    // Serial.print("Confidence: ");
-    // Serial.println(body.confidence);
-    // Serial.print("Status: ");
-    // Serial.println(body.status); // Status 0 indicates valid data
-    // Serial.println("----------");
+    if (body.heartRate != 0) {
+      // Print the data to the Serial Monitor
+      // Serial.print("Heartrate: ");
+      Serial.println(body.heartRate);
+      // Serial.print("Oxygen: ");
+      // Serial.println(body.oxygen);
+      // Serial.print("Confidence: ");
+      // Serial.println(body.confidence);
+      // Serial.print("Status: ");
+      // Serial.println(body.status); // Status 0 indicates valid data
+      // Serial.println("----------");
+    }
   }
+}
 
-  // Slowing down the loop
-  delay(250); 
+void recieverCode() {
+  // RECEIVE: Check for age from Processing
+  if (Serial.available() > 0) {
+    String data = Serial.readStringUntil('\n');
+    data.trim();
+    
+    if (data.startsWith("STRESS") && !buzzerOn) {
+      buzzerOn = true;
+      buzzerCode();
+    }
+  }
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   biohub();
+  buzzerCode();
+  recieverCode();
 }

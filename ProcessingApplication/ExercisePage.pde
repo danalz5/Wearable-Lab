@@ -52,14 +52,14 @@ void drawButton() {
   text("Done", width/2, buttonY + buttonH/2);
 }
 
-void mousePressed() {
-  if (page == 2) {
+void mousePressedExercise() {
+  if (page == Page.EXERCISE_PAGE) {
     // Check if Done button was clicked
     if (mouseX > buttonX && mouseX < buttonX + buttonW &&
         mouseY > buttonY && mouseY < buttonY + buttonH) {
       println("Done button clicked!");
       endExercise = millis();
-      page = 3;  // Move to next page
+      page = Page.HEART_RATE_GRAPH;  // Move to next page
     }
   }
 }
@@ -84,11 +84,13 @@ void serialEventExercise(Serial p) {
   line = trim(line);
   if (line.length() == 0) return;
   
-  float v = float(line);
-  float currentTime = (millis() - startExercise) / 1000.0;  // seconds
-  timeStamps.add(currentTime);
-  heartRates.add(v);
-  println(timeStamps);
-  println(heartRates);
-  println(timeStamps.size() == heartRates.size());
+    // Parse heart rate data
+  if (line.startsWith("HR:")) {
+    float v = int(line.substring(3));
+    float currentTime = (millis() - startExercise) / 1000.0;  // seconds
+    timeStamps.add(currentTime);
+    heartRates.add(v);
+    println("Heart rate received: " + v);
+    // Use heartRate in your graph
+  }
 }

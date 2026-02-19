@@ -1,5 +1,4 @@
 int baseHeartRate = 0;
-int maxHeartRate = 0;
 
 int bhrPage = 0;  // 0 = instruction, 1 = timer, 2 = success
 int timerStart = 0;
@@ -70,8 +69,8 @@ void keyPressedBHR(){
     timerStart = millis();  // Start the timer
     
   } else if (bhrPage == 2) {
-    // Move from success page to exercise (add your code here)
-    page += 1;
+    // Move from success page to select mode (add your code here)
+    page = Page.SELECT_MODE;
     println("Starting exercise!");
     // You can set a flag here to start your heart rate monitoring
   }
@@ -83,7 +82,6 @@ void calculateBHR() {
     total += heartRate;
   }
   baseHeartRate = (int)(total / heartRates.size());
-  maxHeartRate = 220 - baseHeartRate;
   println(baseHeartRate);
   println(heartRates);
   heartRates.clear();
@@ -98,6 +96,10 @@ void serialEventBHR(Serial p) {
   line = trim(line);
   if (line.length() == 0) return;
   
-  float v = float(line);
-  heartRates.add(v);
+  // Parse heart rate data
+  if (line.startsWith("HR:")) {
+    float v = int(line.substring(3));
+    heartRates.add(v);
+    println("Heart rate received: " + v);
+  }
 }
