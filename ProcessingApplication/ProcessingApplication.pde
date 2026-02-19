@@ -31,9 +31,12 @@ void setup() {
   setupDoneButtonProperties();
   setupCalmPage();
   
+  
+  //Setting varaibles automatically
   age = 21;
   maxHeartRate = 220 - age;
   baseHeartRate = (int)(maxHeartRate * 0.5);
+  //Setting the page
   page = Page.SELECT_MODE;
 }
 
@@ -103,6 +106,12 @@ void serialEvent(Serial p) {
       break;
     case EXERCISE_PAGE:
       serialEventExercise(p);
+      break;
+    case CALM_MUSIC:
+      serialEventCalm(p);
+      break;
+    case STRESS_PAGE:
+      serialEventStress(p);
       break;
   }
 }

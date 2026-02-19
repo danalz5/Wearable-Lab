@@ -51,3 +51,25 @@ void drawStressModePage() {
     // ==============================
   }
 }
+
+void serialEventStress(Serial p) {
+  String line = p.readStringUntil('\n');
+  
+  //If the 
+  if (line == null || !isNumeric(line) || startExercise == 0) return;
+  line = trim(line);
+  if (line.length() == 0) return;
+  
+  // Parse heart rate data
+  if (line.startsWith("HR:")) {
+    float v = int(line.substring(3));
+    //If the value is higher than expected
+    if (v > baseHeartRate + offset) {
+      println("User is STRESSED");
+      p.write("STRESS");
+    } else {
+      println("User is Not Stressed");
+    }
+    println("Heart rate received: " + v);
+  }
+}

@@ -4,6 +4,8 @@ Minim minim;
 AudioPlayer calmMusic;
 boolean musicStarted = false;
 
+int offset = 5;
+
 void setupCalmPage() {
   // Initialize Minim
   minim = new Minim(this);
@@ -54,4 +56,25 @@ void stop() {
   calmMusic.close();
   minim.stop();
   super.stop();
+}
+
+void serialEventCalm(Serial p) {
+  String line = p.readStringUntil('\n');
+  
+  //If the 
+  if (line == null || !isNumeric(line) || startExercise == 0) return;
+  line = trim(line);
+  if (line.length() == 0) return;
+  
+  // Parse heart rate data
+  if (line.startsWith("HR:")) {
+    float v = int(line.substring(3));
+    //If the value is higher than expected
+    if (v > baseHeartRate + offset) {
+      println("Heart rate is calm");
+    } else {
+      println("Heart rate is NOT calm");
+    }
+    println("Heart rate received: " + v);
+  }
 }

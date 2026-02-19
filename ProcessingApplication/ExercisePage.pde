@@ -84,11 +84,13 @@ void serialEventExercise(Serial p) {
   line = trim(line);
   if (line.length() == 0) return;
   
-  float v = float(line);
-  float currentTime = (millis() - startExercise) / 1000.0;  // seconds
-  timeStamps.add(currentTime);
-  heartRates.add(v);
-  println(timeStamps);
-  println(heartRates);
-  println(timeStamps.size() == heartRates.size());
+    // Parse heart rate data
+  if (line.startsWith("HR:")) {
+    float v = int(line.substring(3));
+    float currentTime = (millis() - startExercise) / 1000.0;  // seconds
+    timeStamps.add(currentTime);
+    heartRates.add(v);
+    println("Heart rate received: " + v);
+    // Use heartRate in your graph
+  }
 }
