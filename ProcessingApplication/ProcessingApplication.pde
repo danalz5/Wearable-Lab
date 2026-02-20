@@ -32,13 +32,13 @@ void setup() {
   setupCalmPage();
   
   
-  //Setting varaibles automatically
-    age = 25;
-    maxHeartRate = 220 - age;
-    baseHeartRate = 85;
-    setHeartRateValues();
-    //Setting the page
-    page = Page.SELECT_MODE;
+  ////Setting varaibles automatically
+  //  age = 25;
+  //  maxHeartRate = 220 - age;
+  //  baseHeartRate = 85;
+  //  setHeartRateValues();
+  //  //Setting the page
+  //  page = Page.SELECT_MODE;
 }
 
 void setupPort() {
@@ -72,7 +72,7 @@ void draw() {
       break;
     case EXERCISE_PAGE:
       drawExercisePage();
-      sampleData();
+      //sampleData();
       break;
     case HEART_RATE_GRAPH:
       drawHealthGraphPage();
@@ -106,7 +106,7 @@ void serialEvent(Serial p) {
       serialEventBHR(p);
       break;
     case EXERCISE_PAGE:
-      //serialEventExercise(p);
+      serialEventExercise(p);
       break;
     case CALM_MUSIC:
       serialEventCalm(p);
