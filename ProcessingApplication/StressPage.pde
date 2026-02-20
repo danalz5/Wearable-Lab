@@ -8,73 +8,70 @@ void drawStressModePage() {
     stressTimerStart = millis();
     stressTimerRunning = true;
   }
-  
+
+  // Reuse the SAME back-to-menu button (bottom)
+  backToMenuBtn.update();
+  backToMenuBtn.display();
+
   // Calculate remaining time
   int elapsed = (millis() - stressTimerStart) / 1000;
   int remaining = stressTimerDuration - elapsed;
-  
+
   if (remaining > 0) {
     // Display header
-    fill(0);
+    fill(255);
     textSize(48);
     text("Stress Mode", width/2, 100);
-    
+
     // Display instruction text
     textSize(18);
-    fill(80);
+    fill(255);
     text("Recall a time when you felt stressed", width/2, 180);
-    
+
     // Display countdown timer
-    fill(255, 0, 0);
+    fill(255, 60, 60);
     textSize(72);
     text(remaining, width/2, height/2 + 50);
-    
+
     // Optional: Show "seconds remaining" text
-    fill(100);
+    fill(255);
     textSize(16);
     text("seconds remaining", width/2, height/2 + 120);
-    
+
   } else {
-    // ===== PUT YOUR CODE HERE =====
-    // This runs when the 60 second timer finishes
-    
     println("Stress mode complete!");
-    page = Page.SELECT_MODE;  // move to next page
-    stressTimerRunning = false;  // reset timer
-    
-    // You could also:
-    // - Save stress-related heart rate data
-    // - Calculate average heart rate during stress
-    // - Display stress results
-    // - Compare calm vs stress heart rates
-    
-    // ==============================
+    page = Page.SELECT_MODE;
+    stressTimerRunning = false;
   }
 }
 
-//FOR DEBUGGING ONLY
+// Called when user presses Back to Menu (so timer doesn't resume mid-way)
+void resetStressTimer() {
+  stressTimerRunning = false;
+  stressTimerStart = 0;
+}
+
+// FOR DEBUGGING ONLY
 void keyPressedStress() {
   if (key == 's' || key == 'S') {
     println("Manually sending STRESS command");
-    port.write("STRESS\n");
+    if (port != null) port.write("STRESS\n");
   }
 }
 
-void serialEventStress(Serial p) {
+// Called from ProcessingAPP.serialEvent(...) when page == STRESS_PAGE
+void serialEventStressHelper(Serial p) {
   final int offset = 5;
-  
-  //Get data from Serial
+
   String line = p.readStringUntil('\n');
   if (line == null) return;
   line = trim(line);
   if (line.length() == 0) return;
   println(line);
-  
-  // Parse heart rate data
+
   if (line.startsWith("HR:")) {
     float v = int(line.substring(3));
-    
-    //If the value is higher than expected
+
     if (v > baseHeartRate + offset) {
       println("User is STRESSED");
       p.write("STRESS\n");

@@ -6,7 +6,7 @@ int buzzerPin = 12;
 //Biohub varaibles
 SparkFun_Bio_Sensor_Hub bioHub; // Create an object of the library
 unsigned long lastBioHubCheck = 0;
-const int BIOHUB_INTERVAL = 250;
+const int BIOHUB_INTERVAL = 500;
 
 //Buzzer variables
 bool buzzerOn = false;

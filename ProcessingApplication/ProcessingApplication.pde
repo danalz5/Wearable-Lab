@@ -1,3 +1,5 @@
+
+
 import processing.serial.*;           //Required for accessing serial port
 import org.gicentre.utils.stat.*;     // Requires giCentre Utils
 
@@ -30,6 +32,7 @@ final color TEXT_SUB  = color(170, 178, 196);
 
 PFont fontTitle, fontUI;
 
+
 void setup() {
   size(420, 440);
   smooth(8);
@@ -41,14 +44,14 @@ void setup() {
 
   setupPort();
   setupDoneButtonProperties();
-  setupCalmPage();
+  setupCalmPage();   // in Calm file
 
   //Setting varaibles automatically
   age = 25;
   maxHeartRate = 220 - age;
   baseHeartRate = 85;
   setHeartRateValues();
-  //Setting the page
+
   page = Page.SELECT_MODE;
 }
 
@@ -60,7 +63,6 @@ void setupPort() {
       String portName = Serial.list()[i];
       if (portName.equals("/dev/cu.usbmodem123456781")) {
         port = new Serial(this, portName, 115200);
-        //port.clear();
         break;
       }
     }
@@ -68,7 +70,6 @@ void setupPort() {
 }
 
 void draw() {
-  // solid, modern background
   background(BG);
 
   switch (page) {
@@ -79,7 +80,7 @@ void draw() {
       displayBHRPage();
       break;
     case SELECT_MODE:
-      drawSelectPage(); // updated visuals in Home page file
+      drawSelectPage();
       break;
     case EXERCISE_PAGE:
       drawExercisePage();
@@ -99,12 +100,12 @@ void draw() {
 
 boolean isNumeric(String strNum) {
   if (strNum == null) return false;
-  try { double d = Double.parseDouble(strNum); }
+  try { Double.parseDouble(strNum); }
   catch (NumberFormatException nfe) { return false; }
   return true;
 }
 
-//Called from Serial object!
+// Called from Serial object (MUST be named serialEvent)
 void serialEvent(Serial p) {
   switch (page) {
     case BASE_HEART_RATE:
@@ -114,10 +115,10 @@ void serialEvent(Serial p) {
       //serialEventExercise(p);
       break;
     case CALM_MUSIC:
-      serialEventCalm(p);
+      serialEventCalmHelper(p);   // helper in Calm file
       break;
     case STRESS_PAGE:
-      serialEventStress(p);
+      serialEventStressHelper(p); // helper in Stress file (below)
       break;
   }
 }
@@ -135,6 +136,7 @@ void keyPressed() {
       break;
   }
 }
+
 void mousePressed() {
   switch (page) {
     case SELECT_MODE:
@@ -148,7 +150,17 @@ void mousePressed() {
 
     case HEART_RATE_GRAPH:
       backToMenuBtn.onPress();
-      mousePressedGraph();
+      mousePressedBackToMenu();
+      break;
+
+    case CALM_MUSIC:
+      backToMenuBtn.onPress();
+      mousePressedBackToMenu();
+      break;
+
+    case STRESS_PAGE:
+      backToMenuBtn.onPress();
+      mousePressedBackToMenu();
       break;
   }
 }
@@ -156,25 +168,24 @@ void mousePressed() {
 void mouseReleased() {
   if (page == Page.SELECT_MODE) {
     button1.onRelease(); button2.onRelease(); button3.onRelease();
-  } else if (page == Page.HEART_RATE_GRAPH) {
+  } else if (page == Page.HEART_RATE_GRAPH || page == Page.CALM_MUSIC || page == Page.STRESS_PAGE) {
     backToMenuBtn.onRelease();
   }
 }
 
-
-// =========================
-// 4) Add this handler
-// =========================
-void mousePressedGraph() {
-  if (page != Page.HEART_RATE_GRAPH) return;
+// Works for Graph + Calm + Stress
+void mousePressedBackToMenu() {
+  if (!(page == Page.HEART_RATE_GRAPH || page == Page.CALM_MUSIC || page == Page.STRESS_PAGE)) return;
 
   if (backToMenuBtn.isClicked()) {
     println("Back to Menu clicked!");
+
+    if (page == Page.CALM_MUSIC) stopCalmAudio();     // in Calm file
+    if (page == Page.STRESS_PAGE) resetStressTimer(); // in Stress file
+
     page = Page.SELECT_MODE;
   }
 }
-
-
 
 // --- Tiny helper you can use anywhere (optional)
 float easeTo(float current, float target, float amt) {
