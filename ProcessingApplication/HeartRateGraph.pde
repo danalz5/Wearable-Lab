@@ -38,7 +38,6 @@ float percentRage(ArrayList<Float> values, float min, float max) {
       count++;
     }
   }
-  println(count);
   return (float)count / values.size();
 }
 
@@ -71,11 +70,8 @@ void displayExericiseZones() {
   float cardioMax = maximum * 0.85;
   
   float fatBurnPercentage = percentRage(heartRates, minimum, maximum);
-  println(fatBurnPercentage);
   float cardioPercentage = percentRage(heartRates, light, maximum);
-  println(cardioPercentage);
   float peakPercentage = percentRage(heartRates, cardioMax, maximum);
-  println(peakPercentage);
   
   float totalSeconds = timeStamps.get(timeStamps.size() - 1) - timeStamps.get(0);
   
@@ -120,8 +116,6 @@ void drawAxes() {
 }
 
 void drawHeartRateLine() {
-  //println(millis());
-  //println(heartRates.size());
   if (heartRates.size() < 2) return;
   float init_time = timeStamps.get(0);
   float end_time = timeStamps.get(timeStamps.size() - 1);
@@ -158,7 +152,6 @@ void drawHeartRateLine() {
   }
   
   text( (int)((end_time - init_time) / 60) + " min",chartX + chartWidth, chartY + chartHeight);
-  //println("Finished 2nd loop");
 }
 
 

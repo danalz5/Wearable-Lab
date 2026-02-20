@@ -82,7 +82,7 @@ void serialEventExercise(Serial p) {
   String line = p.readStringUntil('\n');
   
   //If the 
-  if (line == null || !isNumeric(line) || startExercise == 0) return;
+  if (line == null || startExercise == 0) return;
   line = trim(line);
   if (line.length() == 0) return;
   
@@ -91,6 +91,11 @@ void serialEventExercise(Serial p) {
     float v = int(line.substring(3));
     float currentTime = (millis() - startExercise) / 1000.0;  // seconds
     timeStamps.add(currentTime);
+    if (v == 0) {
+      float latestElement = heartRates.get(heartRates.size() - 1);
+      heartRates.add(latestElement);
+      return;
+    }
     heartRates.add(v);
     println("Heart rate received: " + v);
     // Use heartRate in your graph

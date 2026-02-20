@@ -33,12 +33,12 @@ void setup() {
   
   
   //Setting varaibles automatically
-  age = 21;
-  maxHeartRate = 220 - age;
-  baseHeartRate = (int)(maxHeartRate * 0.5);
-  setHeartRateValues();
-  //Setting the page
-  page = Page.SELECT_MODE;
+    age = 25;
+    maxHeartRate = 220 - age;
+    baseHeartRate = 85;
+    setHeartRateValues();
+    //Setting the page
+    page = Page.SELECT_MODE;
 }
 
 void setupPort() {
@@ -49,7 +49,7 @@ void setupPort() {
       String portName = Serial.list()[i];
       if (portName.equals("/dev/cu.usbmodem123456781")) {
         port = new Serial(this, portName, 115200);
-        port.clear();
+        //port.clear();
         break;
       }
     }
@@ -124,6 +124,9 @@ void keyPressed() {
       break;
     case BASE_HEART_RATE:
       keyPressedBHR();
+      break;
+    case STRESS_PAGE:
+      keyPressedStress();
       break;
   }
 }

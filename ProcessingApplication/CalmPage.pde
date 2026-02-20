@@ -4,8 +4,6 @@ Minim minim;
 AudioPlayer calmMusic;
 boolean musicStarted = false;
 
-int offset = 5;
-
 void setupCalmPage() {
   // Initialize Minim
   minim = new Minim(this);
@@ -60,9 +58,10 @@ void stop() {
 
 void serialEventCalm(Serial p) {
   String line = p.readStringUntil('\n');
+  int offset = 5;
   
   //If the 
-  if (line == null || !isNumeric(line) || startExercise == 0) return;
+  if (line == null || startExercise == 0) return;
   line = trim(line);
   if (line.length() == 0) return;
   
