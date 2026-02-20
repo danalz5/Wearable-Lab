@@ -37,7 +37,7 @@ void createHeader() {
   stroke(0);
   rect(0, 0, width, 50);
   
-  fill(255, 240);
+  fill(255, 240);              // already white-ish
   textAlign(CENTER, CENTER);
   String date = nf(month(), 2) + "/" + nf(day(), 2) + "/" + nf(year(), 2);
   text(date, width/8, 30);
@@ -50,25 +50,22 @@ void createHeader() {
 }
 
 void displayExericiseZones() {
-  if (timeStamps.size() < 2) return; // Need at least two points for time
+  if (timeStamps.size() < 1) return;
   
   textAlign(LEFT, CENTER);
-  fill(0);
+  fill(255);                   // WHITE
   textSize(16);
   text("Exercise Zones", 30, 70);
   
   float cardioMax = maximum * 0.85;
   
-  // Calculate unique time slices
   float peakPct    = percentRage(heartRates, cardioMax, maximum);
   float cardioPct  = percentRage(heartRates, light, cardioMax);
   float fatBurnPct = percentRage(heartRates, minimum, light);
   
-  // Get total duration in seconds
   float totalSeconds = timeStamps.get(timeStamps.size() - 1) - timeStamps.get(0);
   int MAX_WIDTH = 135;
   
-  // Arrays ordered: Peak(Red), Cardio(Orange), Fat burn(Yellow)
   String[] labels = {"Peak", "Cardio", "Fat burn"};
   float[] pcts    = {peakPct, cardioPct, fatBurnPct};
   color[] colors  = {
@@ -83,56 +80,79 @@ void displayExericiseZones() {
     int yPos = 85 + (yOffset * i); 
     float barWidth = pcts[i] * MAX_WIDTH;
     
-    // Draw the bar
     fill(colors[i]);
     rect(30, yPos, barWidth, 25);
     
-    // FIX: Correct Minute Calculation
-    // We multiply totalSeconds by the percentage, then divide by 60.0 (float)
-    // Using Math.round() prevents it from always rounding down to 0.
-    int zoneMinutes = Math.round((pcts[i] * totalSeconds) / 60.0f);
-    
-    // If you want to see seconds if minutes are 0, use this instead:
-    // int zoneSeconds = Math.round(pcts[i] * totalSeconds);
-    
-    fill(0);
+    fill(255);                 // WHITE text labels
     textSize(11);
-    text(zoneMinutes + " min " + labels[i], 35 + barWidth, yPos + 12);
+    int zoneMinutes = (int)((pcts[i] * totalSeconds) / 60);
+    text(zoneMinutes + "m " + labels[i], 35 + barWidth, yPos + 12);
   }
 }
 
 void drawAxes() {
-  stroke(0);
+  stroke(255);                 // OPTIONAL: make axes white too (looks better on dark bg)
   strokeWeight(1);
+
   // Main Axes
   line(chartX, chartY, chartX, chartY + chartHeight);  
   line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight); 
   
-  fill(0);
+  fill(255);                   // WHITE
   textSize(10);
   textAlign(RIGHT, CENTER);
   
-  // FIX: Draw ticks every 50 BPM
+  // Draw ticks every 50 BPM
   for (int hrVal = 0; hrVal <= maximum; hrVal += 50) {
-    // Map the HR value to the vertical pixel position
     float y = map(hrVal, 0, maximum, chartY + chartHeight, chartY);
     
     line(chartX - 5, y, chartX, y); // Small tick line
-    text(hrVal, chartX - 8, y);     // BPM Label (0, 50, 100, 150, etc.)
+    text(hrVal, chartX - 8, y);     // WHITE BPM label
   }
   
   // X-Axis Label
   textAlign(CENTER, TOP);
-  text("Time (Session)", chartX + chartWidth/2, chartY + chartHeight + 8);
+  text("Time (Session)", chartX + chartWidth/2, chartY + chartHeight + 8); // WHITE
 }
 
-
-
+void drawHeartRateLine() {
+  if (heartRates.size() < 2) return;
+  float init_time = timeStamps.get(0);
+  float end_time = timeStamps.get(timeStamps.size() - 1);
+  
+  for (int i = 0; i < heartRates.size() - 1; i++) {
+    float hr1 = heartRates.get(i);
+    float hr2 = heartRates.get(i + 1);
+    
+    // Zone Color Logic
+    if (hr1 <= veryLight) stroke(chartColors[0]);
+    else if (hr1 <= light) stroke(chartColors[1]);
+    else if (hr1 <= moderate) stroke(chartColors[2]);
+    else if (hr1 <= hard) stroke(chartColors[3]);
+    else stroke(chartColors[4]);
+    
+    strokeWeight(2);
+    
+    float x1 = map(timeStamps.get(i), init_time, end_time, chartX, chartX + chartWidth);
+    float x2 = map(timeStamps.get(i+1), init_time, end_time, chartX, chartX + chartWidth);
+    
+    float y1 = map(hr1, 0, maximum, chartY + chartHeight, chartY);
+    float y2 = map(hr2, 0, maximum, chartY + chartHeight, chartY);
+    
+    line(x1, y1, x2, y2);
+  }
+}
 void drawHealthGraphPage(){
   createHeader();
   displayExericiseZones();
   displayGraph();
+
+  // --- Back button (bottom)
+  backToMenuBtn.update();
+  backToMenuBtn.display();
 }
+
+
 
 void displayGraph(){
   drawAxes();

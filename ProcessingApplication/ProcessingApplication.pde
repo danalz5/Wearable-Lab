@@ -1,5 +1,5 @@
-import processing.serial.*; //Required for accessing serial port
-import org.gicentre.utils.stat.*;   // Requires giCentre Utils
+import processing.serial.*;           //Required for accessing serial port
+import org.gicentre.utils.stat.*;     // Requires giCentre Utils
 
 enum Page {
   AGE_INPUT,
@@ -23,22 +23,33 @@ ArrayList<Float> heartRates = new ArrayList<Float>();
 ArrayList<Float> timeStamps = new ArrayList<Float>(); //Seconds
 int maxHeartRate = 0;
 
+// --- Modern theme (solid background + clean palette)
+final color BG        = color(12, 16, 26);
+final color TEXT_MAIN = color(242, 244, 250);
+final color TEXT_SUB  = color(170, 178, 196);
+
+PFont fontTitle, fontUI;
+
 void setup() {
-  size(400,400);
-  textSize(15);
+  size(420, 440);
+  smooth(8);
+
+  fontTitle = createFont("SF Pro Display", 30, true);
+  fontUI    = createFont("SF Pro Text", 16, true);
+  textFont(fontUI);
   textAlign(CENTER, CENTER);
+
   setupPort();
   setupDoneButtonProperties();
   setupCalmPage();
-  
-  
-  ////Setting varaibles automatically
-  //  age = 25;
-  //  maxHeartRate = 220 - age;
-  //  baseHeartRate = 85;
-  //  setHeartRateValues();
-  //  //Setting the page
-  //  page = Page.SELECT_MODE;
+
+  //Setting varaibles automatically
+  age = 25;
+  maxHeartRate = 220 - age;
+  baseHeartRate = 85;
+  setHeartRateValues();
+  //Setting the page
+  page = Page.SELECT_MODE;
 }
 
 void setupPort() {
@@ -56,10 +67,10 @@ void setupPort() {
   }
 }
 
-
 void draw() {
-  background(255);
-  
+  // solid, modern background
+  background(BG);
+
   switch (page) {
     case AGE_INPUT:
       drawInputPage();
@@ -68,11 +79,11 @@ void draw() {
       displayBHRPage();
       break;
     case SELECT_MODE:
-      drawSelectPage();
+      drawSelectPage(); // updated visuals in Home page file
       break;
     case EXERCISE_PAGE:
       drawExercisePage();
-      //sampleData();
+      sampleData();
       break;
     case HEART_RATE_GRAPH:
       drawHealthGraphPage();
@@ -87,16 +98,10 @@ void draw() {
 }
 
 boolean isNumeric(String strNum) {
-    if (strNum == null) {
-        return false;
-    }
-    
-    try {
-        double d = Double.parseDouble(strNum);
-    } catch (NumberFormatException nfe) {
-        return false;
-    }
-    return true;
+  if (strNum == null) return false;
+  try { double d = Double.parseDouble(strNum); }
+  catch (NumberFormatException nfe) { return false; }
+  return true;
 }
 
 //Called from Serial object!
@@ -106,7 +111,7 @@ void serialEvent(Serial p) {
       serialEventBHR(p);
       break;
     case EXERCISE_PAGE:
-      serialEventExercise(p);
+      //serialEventExercise(p);
       break;
     case CALM_MUSIC:
       serialEventCalm(p);
@@ -130,14 +135,48 @@ void keyPressed() {
       break;
   }
 }
-
 void mousePressed() {
   switch (page) {
     case SELECT_MODE:
+      button1.onPress(); button2.onPress(); button3.onPress();
       mousePressedSelect();
       break;
+
     case EXERCISE_PAGE:
       mousePressedExercise();
       break;
+
+    case HEART_RATE_GRAPH:
+      backToMenuBtn.onPress();
+      mousePressedGraph();
+      break;
   }
+}
+
+void mouseReleased() {
+  if (page == Page.SELECT_MODE) {
+    button1.onRelease(); button2.onRelease(); button3.onRelease();
+  } else if (page == Page.HEART_RATE_GRAPH) {
+    backToMenuBtn.onRelease();
+  }
+}
+
+
+// =========================
+// 4) Add this handler
+// =========================
+void mousePressedGraph() {
+  if (page != Page.HEART_RATE_GRAPH) return;
+
+  if (backToMenuBtn.isClicked()) {
+    println("Back to Menu clicked!");
+    page = Page.SELECT_MODE;
+  }
+}
+
+
+
+// --- Tiny helper you can use anywhere (optional)
+float easeTo(float current, float target, float amt) {
+  return lerp(current, target, constrain(amt, 0, 1));
 }
