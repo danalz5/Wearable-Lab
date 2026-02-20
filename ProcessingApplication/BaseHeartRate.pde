@@ -20,7 +20,7 @@ void displayBHRPage() {
 
 // Page 0: Initial instruction
 void displayInitialInstructions(){
-  fill(0);
+  fill(255);
   text("Sit still for 30 seconds", width/2, height/2 - 30);
   
   fill(150);
@@ -35,7 +35,7 @@ void showTimerPage() {
   int remaining = timerDuration - elapsed;
   
   if (remaining > 0) {
-    fill(0);
+    fill(255);
     text("Please remain still...", width/2, height/2 - 50);
     
     // Display countdown
@@ -54,7 +54,7 @@ void displayLastPage(){
   fill(0, 150, 0);
   text("Success!", width/2, height/2 - 30);
   
-  fill(0);
+  fill(255);
   textSize(15);
   text("Your resting heart rate is " + baseHeartRate, width/2, height/2);
   textSize(18);
