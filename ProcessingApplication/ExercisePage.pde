@@ -59,6 +59,7 @@ void mousePressedExercise() {
         mouseY > buttonY && mouseY < buttonY + buttonH) {
       println("Done button clicked!");
       endExercise = millis();
+      setHeartRateValues();
       page = Page.HEART_RATE_GRAPH;  // Move to next page
     }
   }
@@ -69,18 +70,19 @@ void sampleData() {
   float currentTime = (millis() - startExercise) / 1000.0;  // seconds
   timeStamps.add(currentTime);
   heartRates.add(sampleValue);
-  println(timeStamps);
-  println(heartRates);
-  println(timeStamps.size() == heartRates.size());
+  //println(timeStamps);
+  //println(heartRates);
+  //println(timeStamps.size() == heartRates.size());
   sampleValue += random(-2, 2);
-  sampleValue = Math.min(maxHeartRate, Math.max(0, sampleValue));
+  //sampleValue = Math.min(maxHeartRate, Math.max(0, sampleValue));
+  sampleValue = Math.min(maxHeartRate, Math.max(light, sampleValue));
 }
 
 void serialEventExercise(Serial p) {
   String line = p.readStringUntil('\n');
   
   //If the 
-  if (line == null || !isNumeric(line) || startExercise == 0) return;
+  if (line == null || startExercise == 0) return;
   line = trim(line);
   if (line.length() == 0) return;
   
@@ -89,6 +91,11 @@ void serialEventExercise(Serial p) {
     float v = int(line.substring(3));
     float currentTime = (millis() - startExercise) / 1000.0;  // seconds
     timeStamps.add(currentTime);
+    if (v == 0) {
+      float latestElement = heartRates.get(heartRates.size() - 1);
+      heartRates.add(latestElement);
+      return;
+    }
     heartRates.add(v);
     println("Heart rate received: " + v);
     // Use heartRate in your graph

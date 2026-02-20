@@ -70,6 +70,7 @@ void keyPressedBHR(){
     
   } else if (bhrPage == 2) {
     // Move from success page to select mode (add your code here)
+    heartRates.clear();
     page = Page.SELECT_MODE;
     println("Starting exercise!");
     // You can set a flag here to start your heart rate monitoring
@@ -92,7 +93,7 @@ void serialEventBHR(Serial p) {
   String line = p.readStringUntil('\n');
   
   //If the 
-  if (line == null || !isNumeric(line)) return;
+  if (line == null) return;
   line = trim(line);
   if (line.length() == 0) return;
   

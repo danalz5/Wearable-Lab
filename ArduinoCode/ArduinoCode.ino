@@ -1,4 +1,4 @@
-int buzzerPin = 11;
+int buzzerPin = 12;
 
 #include <Wire.h> // I2C Library
 #include "SparkFun_Bio_Sensor_Hub_Library.h" // SparkFun Bio Sensor Hub Library
@@ -6,13 +6,13 @@ int buzzerPin = 11;
 //Biohub varaibles
 SparkFun_Bio_Sensor_Hub bioHub; // Create an object of the library
 unsigned long lastBioHubCheck = 0;
-const BIOHUB_INTERVAL = 250;
+const int BIOHUB_INTERVAL = 250;
 
 //Buzzer variables
 bool buzzerOn = false;
 unsigned long lastBuzzerCheck = 0;
-const BUZZER_INTERVAL1 = 1000;
-const BUZZER_INTERVAL2 = 2000;
+const int BUZZER_INTERVAL1 = 1000;
+const int BUZZER_INTERVAL2 = 2000;
 
 void setup() {
   pinMode(buzzerPin, OUTPUT); // Set the buzzer pin as an output
@@ -45,19 +45,23 @@ void intiializeBiohub(){
 }
 
 void buzzerCode() {
-  if (!buzzerOn) return;
+  if (!buzzerOn){
+    noTone(buzzerPin);
+    return;
+  }
 
-  //TODO: Replace BUZZER CODE HERE!
+  unsigned long currentMillis = millis();
 
-  
-  // Play a 1000 Hz tone for 1 second
-  tone(buzzerPin, 1000);
-  delay(1000);
-
-  // Stop the tone
-  noTone(buzzerPin);
-  delay(1000);
-  buzzerOn = false;
+  if (currentMillis - lastBuzzerCheck < 1000) {
+    tone(buzzerPin, 1000);
+  }
+  else if (currentMillis - lastBuzzerCheck < 2000) {
+    noTone(buzzerPin);
+  }
+  else {
+    buzzerOn = false;
+    lastBuzzerCheck = currentMillis;
+  }
 }
 
 void biohub() {
@@ -69,7 +73,7 @@ void biohub() {
     if (body.heartRate != 0) {
       // Print the data to the Serial Monitor
       // Serial.print("Heartrate: ");
-      Serial.println(body.heartRate);
+      Serial.println("HR:" + String(body.heartRate));
       // Serial.print("Oxygen: ");
       // Serial.println(body.oxygen);
       // Serial.print("Confidence: ");
@@ -86,10 +90,20 @@ void recieverCode() {
   if (Serial.available() > 0) {
     String data = Serial.readStringUntil('\n');
     data.trim();
+
+    if (data.length() == 0) return;
+
+    Serial.print("Raw received: [");
+    Serial.print(data);
+    Serial.print("] Length: ");
+    Serial.print(data.length());
+    Serial.print("Is index found: ");
+    Serial.println(data.indexOf("S"));
+    Serial.println(buzzerOn);
     
-    if (data.startsWith("STRESS") && !buzzerOn) {
+    if (data.indexOf("S") >= 0 && !buzzerOn) {
+      Serial.println("STRESS detected - turning on buzzer");
       buzzerOn = true;
-      buzzerCode();
     }
   }
 }

@@ -52,21 +52,32 @@ void drawStressModePage() {
   }
 }
 
+//FOR DEBUGGING ONLY
+void keyPressedStress() {
+  if (key == 's' || key == 'S') {
+    println("Manually sending STRESS command");
+    port.write("STRESS\n");
+  }
+}
+
 void serialEventStress(Serial p) {
-  String line = p.readStringUntil('\n');
+  final int offset = 5;
   
-  //If the 
-  if (line == null || !isNumeric(line) || startExercise == 0) return;
+  //Get data from Serial
+  String line = p.readStringUntil('\n');
+  if (line == null) return;
   line = trim(line);
   if (line.length() == 0) return;
+  println(line);
   
   // Parse heart rate data
   if (line.startsWith("HR:")) {
     float v = int(line.substring(3));
+    
     //If the value is higher than expected
     if (v > baseHeartRate + offset) {
       println("User is STRESSED");
-      p.write("STRESS");
+      p.write("STRESS\n");
     } else {
       println("User is Not Stressed");
     }
