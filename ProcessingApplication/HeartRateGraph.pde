@@ -1,6 +1,4 @@
-//Chart variables
-color[] chartColors = {color(150, 150, 150), color(0, 190, 255), color(65, 245, 130), color(98, 245, 65), color(245, 160, 65)}; //light, moderate, hard, max
-//Grey, Blue, green, yellow, orange
+color[] chartColors = {color(150, 150, 150), color(0, 190, 255), color(65, 245, 130), color(98, 245, 65), color(245, 160, 65)}; 
 
 float maximum = 0;
 float hard = 0;
@@ -9,18 +7,10 @@ float light = 0;
 float veryLight = 0;
 float minimum = 0;
 
-int chartX = 50;
-int chartY = 250;
-int chartWidth = 250;
+int chartX = 55;
+int chartY = 220;    // Shifted up from 250/300 to make room
+int chartWidth = 320; 
 int chartHeight = 100;
-
-// Ring buffers
-final int N = 800;
-float[] bufA = new float[N];
-int idx = 0;
-
-float[] xPlot = new float[N];
-float[] yPlot = new float[N];
 
 void setHeartRateValues() {
   maximum = maxHeartRate;
@@ -32,9 +22,10 @@ void setHeartRateValues() {
 }
 
 float percentRage(ArrayList<Float> values, float min, float max) {
+  if (values.size() == 0) return 0;
   int count = 0;
   for (float value : values) {
-    if (value >= min && value <= max) {
+    if (value >= min && value < max) {
       count++;
     }
   }
@@ -42,121 +33,108 @@ float percentRage(ArrayList<Float> values, float min, float max) {
 }
 
 void createHeader() {
-  //Creates rectangle
   fill(12, 55, 84);
   stroke(0);
   rect(0, 0, width, 50);
   
   fill(255, 240);
   textAlign(CENTER, CENTER);
-  // Format and display date
   String date = nf(month(), 2) + "/" + nf(day(), 2) + "/" + nf(year(), 2);
   text(date, width/8, 30);
   
-  //Display time in app
-  String timeInApp = "43:33 min";
-  text(timeInApp, width/2, 30);
+  float duration = (timeStamps.size() > 0) ? (timeStamps.get(timeStamps.size()-1) - timeStamps.get(0)) / 60.0 : 0;
+  text(nf(duration, 0, 1) + " min", width/2, 30);
   
-  // Format and display time
   String time = nf(hour(), 2) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
   text(time, width * 7 / 8, 30);
 }
 
 void displayExericiseZones() {
+  if (timeStamps.size() < 2) return; // Need at least two points for time
+  
   textAlign(LEFT, CENTER);
-  fill(0, 0, 0);
-  text("Exercise Zones", 30, 75);
+  fill(0);
+  textSize(16);
+  text("Exercise Zones", 30, 70);
   
   float cardioMax = maximum * 0.85;
   
-  float fatBurnPercentage = percentRage(heartRates, minimum, maximum);
-  float cardioPercentage = percentRage(heartRates, light, maximum);
-  float peakPercentage = percentRage(heartRates, cardioMax, maximum);
+  // Calculate unique time slices
+  float peakPct    = percentRage(heartRates, cardioMax, maximum);
+  float cardioPct  = percentRage(heartRates, light, cardioMax);
+  float fatBurnPct = percentRage(heartRates, minimum, light);
   
+  // Get total duration in seconds
   float totalSeconds = timeStamps.get(timeStamps.size() - 1) - timeStamps.get(0);
-  
-  
   int MAX_WIDTH = 135;
+  
+  // Arrays ordered: Peak(Red), Cardio(Orange), Fat burn(Yellow)
   String[] labels = {"Peak", "Cardio", "Fat burn"};
-  int[] widths = { (int)(fatBurnPercentage * MAX_WIDTH), (int)(cardioPercentage * MAX_WIDTH), (int)(peakPercentage * MAX_WIDTH)};
-  color[] colors = {color(255, 150, 150), color(230, 160, 75), color(230, 215, 75)};
-  int yOffset = 45;
+  float[] pcts    = {peakPct, cardioPct, fatBurnPct};
+  color[] colors  = {
+    color(255, 60, 60),   // Red
+    color(255, 160, 0),   // Orange
+    color(255, 220, 0)    // Yellow
+  };
+  
+  int yOffset = 35; 
 
-  // Loop through each heart rate zone
-  //println("This is the 1st loop");
   for (int i = 0; i < labels.length; i++) {
+    int yPos = 85 + (yOffset * i); 
+    float barWidth = pcts[i] * MAX_WIDTH;
+    
+    // Draw the bar
     fill(colors[i]);
-    rect(30, 90 + yOffset * i, widths[i], 30);
-    fill(0, 0, 0);
-    text( (int)(fatBurnPercentage * totalSeconds / 60) + " min " + labels[i], 45 + widths[i], 105 + yOffset * i);
+    rect(30, yPos, barWidth, 25);
+    
+    // FIX: Correct Minute Calculation
+    // We multiply totalSeconds by the percentage, then divide by 60.0 (float)
+    // Using Math.round() prevents it from always rounding down to 0.
+    int zoneMinutes = Math.round((pcts[i] * totalSeconds) / 60.0f);
+    
+    // If you want to see seconds if minutes are 0, use this instead:
+    // int zoneSeconds = Math.round(pcts[i] * totalSeconds);
+    
+    fill(0);
+    textSize(11);
+    text(zoneMinutes + " min " + labels[i], 35 + barWidth, yPos + 12);
   }
-}
-
-void displayGraph(){
-  // Draw axes
-  drawAxes();
-  // Draw heart rate line with zone colors
-  drawHeartRateLine();
 }
 
 void drawAxes() {
   stroke(0);
   strokeWeight(1);
-  line(chartX, chartY, chartX, chartY + chartHeight);  // Y-axis
-  line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);  // X-axis
+  // Main Axes
+  line(chartX, chartY, chartX, chartY + chartHeight);  
+  line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight); 
   
-  // Add labels, tick marks as needed
-  int lineLength = 10;
-  float increment = 1.0 / chartColors.length;
+  fill(0);
+  textSize(10);
+  textAlign(RIGHT, CENTER);
   
-  for (int i = 0 ; i < 5; i ++) {
-    float newChartHeight = chartY + (chartHeight * increment * (i + 1));
-    line(chartX, newChartHeight, chartX + lineLength, newChartHeight);  // Y-axis
+  // FIX: Draw ticks every 50 BPM
+  for (int hrVal = 0; hrVal <= maximum; hrVal += 50) {
+    // Map the HR value to the vertical pixel position
+    float y = map(hrVal, 0, maximum, chartY + chartHeight, chartY);
+    
+    line(chartX - 5, y, chartX, y); // Small tick line
+    text(hrVal, chartX - 8, y);     // BPM Label (0, 50, 100, 150, etc.)
   }
+  
+  // X-Axis Label
+  textAlign(CENTER, TOP);
+  text("Time (Session)", chartX + chartWidth/2, chartY + chartHeight + 8);
 }
 
-void drawHeartRateLine() {
-  if (heartRates.size() < 2) return;
-  float init_time = timeStamps.get(0);
-  float end_time = timeStamps.get(timeStamps.size() - 1);
-  
-  //println("This is the 2nd loop");
-  for (int i = 0; i < heartRates.size() - 2; i++) {
-    float hr = Math.min(maximum, Math.max(minimum, heartRates.get(i)));
-    float nextHR = Math.min(maximum, Math.max(minimum, heartRates.get(i + 1)));
-    
-    // Set color based on heart rate zone
-    if (hr <= veryLight) {
-      stroke(chartColors[0]);  // gray - very light
-    } else if (hr <= light) {
-      stroke(chartColors[1]);  // blue - light
-    } else if (hr <= moderate) {
-      stroke(chartColors[2]);  // green - moderate
-    } else if (hr <= hard) {
-      stroke(chartColors[3]);  // yellow - cardio
-    } else {
-      stroke(chartColors[4]);  // red - peak
-    }
-    
-    strokeWeight(2);
-    
-    // Map to screen coordinates
-    float x1 = map(timeStamps.get(i), init_time, end_time, chartX, chartX + chartWidth);
-    float x2 = map(timeStamps.get(i+1), init_time, end_time, chartX, chartX + chartWidth);
-    
-    float y1 = map(hr, minimum, maximum, chartY + chartHeight, chartY);
-    float y2 = map(nextHR, minimum, maximum, chartY + chartHeight, chartY);
-    //println(x1 + " "  + x2 + " "  + y1 + " "  + y2);
-    
-    line(x1, y1, x2, y2);
-  }
-  
-  text( (int)((end_time - init_time) / 60) + " min",chartX + chartWidth, chartY + chartHeight);
-}
 
 
 void drawHealthGraphPage(){
   createHeader();
   displayExericiseZones();
   displayGraph();
+}
+
+void displayGraph(){
+  drawAxes();
+  drawHeartRateLine();
 }
