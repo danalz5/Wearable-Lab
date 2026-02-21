@@ -3,7 +3,7 @@ String userInput = "";
 
 void drawInputPage(){
   // Display the prompt
-  fill(0);
+  fill(255);
   text("Please enter your age:", width/2, height/2 - 50);
   
   // Display what user has typed
