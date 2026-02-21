@@ -13,12 +13,12 @@ int chartWidth = 320;
 int chartHeight = 100;
 
 void setHeartRateValues() {
-  maximum = maxHeartRate;
-  hard = maxHeartRate * 0.9;
-  moderate = maxHeartRate * 0.8;
-  light = maxHeartRate * 0.7;
-  veryLight = maxHeartRate * 0.6;
-  minimum = maxHeartRate * 0.5;
+  maximum = 130;
+  hard = 120;
+  moderate = 110;
+  light = 100;
+  veryLight = 90;
+  minimum = 80;
 }
 
 float percentRage(ArrayList<Float> values, float min, float max) {
@@ -37,7 +37,7 @@ void createHeader() {
   stroke(0);
   rect(0, 0, width, 50);
   
-  fill(255, 240);              // already white-ish
+  fill(255, 240);
   textAlign(CENTER, CENTER);
   String date = nf(month(), 2) + "/" + nf(day(), 2) + "/" + nf(year(), 2);
   text(date, width/8, 30);
@@ -85,34 +85,45 @@ void displayExericiseZones() {
     
     fill(255);                 // WHITE text labels
     textSize(11);
-    int zoneMinutes = (int)((pcts[i] * totalSeconds) / 60);
-    text(zoneMinutes + "m " + labels[i], 35 + barWidth, yPos + 12);
+    float zoneSeconds = pcts[i] * totalSeconds;
+    String timeLabel;
+    
+    if (zoneSeconds < 60) {
+      timeLabel = Math.round(zoneSeconds) + "s ";
+    } else {
+      timeLabel = Math.round(zoneSeconds / 60.0f) + "m ";
+    }
+    
+    text(timeLabel + labels[i], 35 + barWidth, yPos + 12);
   }
 }
 
 void drawAxes() {
-  stroke(255);                 // OPTIONAL: make axes white too (looks better on dark bg)
+  stroke(255, 50); // Faint white for grid lines
   strokeWeight(1);
+  
+  // Define the zones we want to draw lines for
+  float[] zoneLevels = {minimum, veryLight, light, moderate, hard, maximum};
+  
+  for (float level : zoneLevels) {
+    float y = map(level, 0, maximum, chartY + chartHeight, chartY);
+    line(chartX, y, chartX + chartWidth, y); // Horizontal zone line
+    
+    fill(255, 180);
+    textSize(9);
+    textAlign(RIGHT, CENTER);
+    text((int)level, chartX - 8, y);
+  }
 
   // Main Axes
+  stroke(255);
   line(chartX, chartY, chartX, chartY + chartHeight);  
   line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight); 
   
-  fill(255);                   // WHITE
-  textSize(10);
-  textAlign(RIGHT, CENTER);
-  
-  // Draw ticks every 50 BPM
-  for (int hrVal = 0; hrVal <= maximum; hrVal += 50) {
-    float y = map(hrVal, 0, maximum, chartY + chartHeight, chartY);
-    
-    line(chartX - 5, y, chartX, y); // Small tick line
-    text(hrVal, chartX - 8, y);     // WHITE BPM label
-  }
-  
   // X-Axis Label
   textAlign(CENTER, TOP);
-  text("Time (Session)", chartX + chartWidth/2, chartY + chartHeight + 8); // WHITE
+  fill(255);
+  text("Time (Session)", chartX + chartWidth/2, chartY + chartHeight + 8);
 }
 
 void drawHeartRateLine() {
@@ -124,12 +135,13 @@ void drawHeartRateLine() {
     float hr1 = heartRates.get(i);
     float hr2 = heartRates.get(i + 1);
     
-    // Zone Color Logic
-    if (hr1 <= veryLight) stroke(chartColors[0]);
-    else if (hr1 <= light) stroke(chartColors[1]);
-    else if (hr1 <= moderate) stroke(chartColors[2]);
-    else if (hr1 <= hard) stroke(chartColors[3]);
-    else stroke(chartColors[4]);
+    // Zone Color Logic tied exactly to your variables
+    if (hr1 < minimum) stroke(chartColors[0]);         // Gray (below minimum)
+    else if (hr1 < veryLight) stroke(chartColors[1]);  // Blue (Very Light)
+    else if (hr1 < light) stroke(chartColors[2]);      // Green (Light)
+    else if (hr1 < moderate) stroke(chartColors[3]);   // Bright Green (Moderate)
+    else if (hr1 < hard) stroke(chartColors[4]);       // Orange (Hard)
+    else stroke(255, 60, 60);                          // Red (Peak/Max)
     
     strokeWeight(2);
     

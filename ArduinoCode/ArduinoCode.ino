@@ -6,7 +6,7 @@ int buzzerPin = 12;
 //Biohub varaibles
 SparkFun_Bio_Sensor_Hub bioHub; // Create an object of the library
 unsigned long lastBioHubCheck = 0;
-const int BIOHUB_INTERVAL = 500;
+const int BIOHUB_INTERVAL = 100;
 
 //Buzzer variables
 bool buzzerOn = false;
@@ -93,13 +93,13 @@ void recieverCode() {
 
     if (data.length() == 0) return;
 
-    Serial.print("Raw received: [");
-    Serial.print(data);
-    Serial.print("] Length: ");
-    Serial.print(data.length());
-    Serial.print("Is index found: ");
-    Serial.println(data.indexOf("S"));
-    Serial.println(buzzerOn);
+    // Serial.print("Raw received: [");
+    // Serial.print(data);
+    // Serial.print("] Length: ");
+    // Serial.print(data.length());
+    // Serial.print("Is index found: ");
+    // Serial.println(data.indexOf("S"));
+    // Serial.println(buzzerOn);
     
     if (data.indexOf("S") >= 0 && !buzzerOn) {
       Serial.println("STRESS detected - turning on buzzer");
